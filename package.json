@@ -1,0 +1,11 @@
+{
+    "name": "documentUpload",
+    "version": "1.0.0",
+    "description": "Basic Content Server Upload Script",
+    "dependencies": {
+        "js-cookie": "2.0.3"
+    },
+    "main": "index.html",
+    "author": "Matthew Barben",
+    "license": "MIT"
+}
