@@ -1,3 +1,10 @@
+/* The purpose of this is show:
+ - how a new document can be uploaded to an Attachment volume / folder
+ - how to add a version to a an existing document
+
+
+
+*/
 var supporting = {
 	hasAttachment: function(d, auth) {
 		var promise = $.Deferred();
@@ -81,6 +88,7 @@ $(document).ready(function() {
 
 });
 
+// Add Version to Document 
 $("#initDocumentAddVersion").change(function() {
 	var fd = new FormData();
 	fd.append("id", uploadDocument);
