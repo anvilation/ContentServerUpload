@@ -7,30 +7,44 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	</head>
 	<body>
+	
 		<div class="container">
-			<div class="row">
-				<div class="col-sm-12">
-					<div id="Documment">Document Title</div>
+		<div class="page-header">
+          <h1>Uploading Document to OpenText Content Server <small>Using jQuery</small></h1>
+        </div>
+			<div class="row document" style="display:none">
+				<div class="col-sm-8">
+					<p class="lead">Adding a Version to an Existing Document</p>
 					<div class="form-group">
-						<label for="initDocumentAddVersion">Add Version</label>
 						<input type="file" name="Add Version" id="initDocumentAddVersion" class="form-control">
 						<p class="help-block">Add Document from Desktop</p>
 					</div>
 				</div>
 			</div>
-			<div class="row">
-				<div class="col-sm-12">
+			<hr />
+			<div class="row document" style="display:none">
+				<div class="col-sm-8">
+				    <p class="lead">Upload a document to a folder</p>
 					<div id="supportingDocuments"></div>
 					<div class="form-group">
-						<label for="supportingDocument"></label>
-						<input type="file" name="Supporting Document" id="supportingDocument">
+						<input type="file" name="Supporting Document" id="supportingDocument" class="form-control">
 						<p class="help-block">Upload Supporting Document</p>
 					</div>
 				</div>
 			</div>
+			<hr />
+			<div class="row">
+				<div class="col-sm-8">
+				    <p class="lead">Output</p>
+					<div class="well" id="output">
+						
+					</div>
+				</div>
+			</div>
+
 		</div>
 		<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
-		<script src="/js/js.cookie.js"></script>
-		<script></script>
+		<script src="app.js"></script>
+	
 	</body>
 </html>

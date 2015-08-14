@@ -5,96 +5,102 @@
 
 
 */
-var supporting = {
-	hasAttachment: function(d, auth) {
-		var promise = $.Deferred();
-		var url = '/otcs/cs.exe/api/v1/nodes/' + d + '/nodes';
-		$.ajax({
-			type: "GET",
-			url: url,
-			headers: {
-				"otcsticket": token
-			},
-			success: function(data) {
-				///promise.resolve(data.total_count); // removed because of update in attachment validation
-				promise.resolve(data.data);
-			},
-			error: function() {
-				var error = 'an error occured returning Attachment Volume information';
-				promise.reject(error);
-			}
-		});
-		return promise;
-	}
+// Sample Documents
+var sampleData = {
+		folder: 0, //Folder
+		document: 0, //Document
+		user: "otadmin@otds.admin", //username
+		password: "livelink", //password
+		url: "http://otcs105.exchange.loc/otcs/cs.exe/api/v1", //url to rest api
+		token: null,
 
-};
 
+	},
+    authenticate = function(url, user, password) { // authentication method
+        var promise = $.Deferred();
+        url = url + '/auth';
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                username: user,
+                password: password
+            },
+            success: function(data) {
+                promise.resolve(data.ticket);
+            },
+            error: function() {
+                var error = "Invalid username/password specified";
+                promise.reject(error);
+            }
+        });
+        return promise;
+    },
+    displayDocuments = function(folder, token) {
+        var promise = $.Deferred(),
+            url = sampleData.url + '/nodes/' + folder + '/nodes';
+        $.ajax({
+            type: "GET",
+            url: url,
+            headers: {
+                "otcsticket": token
+            },
+            success: function(data) {
+                promise.resolve(data.data);
+
+
+
+            },
+            error: function() {
+                var error = 'an error occured returning Folder information';
+                promise.reject(error);
+            }
+        });
+        return promise;
+
+    };
 
 $(document).ready(function() {
+	authenticate(sampleData.url, sampleData.user, sampleData.password).done(function(result) {
+		var message = $('<p></p>'),
+			output = $('#output');
+		message.append('Auth Token: ' + result);
+		output.html(message);
+		sampleData.token = result;
+		$('.document').show();
 
-	var supportFolder = supporting.hasAttachment(uploadFolder, token),
-		addVersion = 0,
-		supportFiles;
-
-	supportFolder.done(function(result) {
-		var resultLength = result.length;
-		console.log(result);
-		if (!resultLength) {
-			$('#supportingDocuments').html('<p class="lead">No Supporting Information Uploaded</p>');
-
-		}
-
-
-	}).fail(function(error) {
-		alert(error);
-	});
-
-
-	//$("#supportingDocument").on('change', prepareUpload);
-
-	$("#supportingDocument").change(function() {
-
-		var filename = $(this).val();
-		filename = filename.split('/').pop().split('\\').pop();
-		console.log(filename);
-		var fd = new FormData();
-		fd.append("type", "144");
-		fd.append("parent_id", uploadFolder);
-		fd.append("name", filename);
-		fd.append("file", document.getElementById('supportingDocument').files[0]);
-		var url = '/otcs/cs.exe/api/v1/nodes/';
-
-
-		$.ajax({
-			type: "POST",
-			url: url,
-			data: fd,
-			contentType: false,
-			processData: false,
-			beforeSend: function(xhr) {
-				// Add the ticket from the Autheticate function to the request header.
-				xhr.setRequestHeader("otcsticket", token),
-					xhr.overrideMimeType("multipart/form-data")
+		displayDocuments(sampleData.folder, sampleData.token).done(function(result) {
+			var resultLength = result.length,
+				output = $('#output'),
+				message = $('<p></p>'),
+				documents = $('<ul></ul>');
+			console.log(result);
+			message.append(JSON.stringify(result));
+			output.append(message);
+			if (!resultLength) {
+				$('#supportingDocuments').html('<p class="lead">No Supporting Information Uploaded</p>');
+			} else {
+				var document = "";
+				for (var x = 0; x > resultLength; x++) {
+					document = document + '<li>' + result.name + '<li/>';
+				}
+				documents.append(document);
+				$('#supportingDocuments').append(documents);
 			}
-		}).done(function(data) {
-			console.log(data);
-		}).fail(function(request, statusText) {
-			console.log(statusText);
 		});
-
+	}).fail(function(error) {
+		$('#output').text(error);
 	});
-
 
 
 });
 
 // Add Version to Document 
 $("#initDocumentAddVersion").change(function() {
-	var fd = new FormData();
+	var fd = new FormData(),
+		url = sampleData.url + '/nodes/' + uploadDocument + '/versions';
 	fd.append("id", uploadDocument);
 	fd.append("file", document.getElementById('initDocumentAddVersion').files[0]);
-	var url = '/otcs/cs.exe/api/v1/nodes/' + uploadDocument + '/versions';
-
 
 	$.ajax({
 		type: "POST",
@@ -104,7 +110,7 @@ $("#initDocumentAddVersion").change(function() {
 		processData: false,
 		beforeSend: function(xhr) {
 			// Add the ticket from the Autheticate function to the request header.
-			xhr.setRequestHeader("otcsticket", token),
+			xhr.setRequestHeader("otcsticket", sampleData.token),
 				xhr.overrideMimeType("multipart/form-data")
 		}
 	}).done(function(data) {
@@ -115,7 +121,36 @@ $("#initDocumentAddVersion").change(function() {
 
 });
 
-function prepareUpload(event) {
-	supportFiles = event.target.files;
-	console.log(files);
-}
+$("#supportingDocument").change(function() {
+
+	var filename = $(this).val(),
+        url = sampleData.url + '/nodes/',
+        fd = new FormData();// Create FormData Object
+            
+	filename = filename.split('/').pop().split('\\').pop();
+	console.log(filename);
+	fd.append("type", "144");
+	fd.append("parent_id", sampleData.folder);
+	fd.append("name", filename);
+	fd.append("file", document.getElementById('supportingDocument').files[0]);
+	
+
+
+	$.ajax({
+		type: "POST",
+		url: url,
+		data: fd,
+		contentType: false,
+		processData: false,
+		beforeSend: function(xhr) {
+			// Add the ticket from the Autheticate function to the request header.
+			xhr.setRequestHeader("otcsticket", sampleData.token),
+				xhr.overrideMimeType("multipart/form-data")
+		}
+	}).done(function(data) {
+		console.log(data);
+	}).fail(function(request, statusText) {
+		console.log(statusText);
+	});
+
+});
